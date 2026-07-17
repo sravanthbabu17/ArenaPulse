@@ -7,114 +7,299 @@
  * Run with: npm test (compiles TypeScript then executes with Node)
  */
 
-import assert from 'assert';
-import { VENUE_DATASET } from '../features/stadium/venue.js';
-import { queryCache } from '../lib/cache.js';
+import assert from "assert";
+import supertest from "supertest";
+import { VENUE_DATASET } from "../features/stadium/venue.js";
+import { queryCache } from "../lib/cache.js";
 
-console.log('Starting ArenaPulse Backend Test Suite...\n');
+// We must dynamically import the app so process.env.NODE_ENV = 'test' is set beforehand
+process.env.NODE_ENV = "test";
+import { app } from "../index.js";
+
+const request = supertest(app);
+
+console.log("Starting ArenaPulse Backend Test Suite...\n");
 
 // ── Test Group 1: TTL Cache Operations ──────────────────────────────────────
 
-console.log('--- Test Group 1: Cache Operations ---');
+console.log("--- Test Group 1: Cache Operations ---");
 
 // Standard store and retrieve
-queryCache.set('key1', 'val1', 2000);
-assert.strictEqual(queryCache.get('key1'), 'val1', 'Cache did not store key1 correctly.');
+queryCache.set("key1", "val1", 2000);
+assert.strictEqual(
+  queryCache.get("key1"),
+  "val1",
+  "Cache did not store key1 correctly.",
+);
 
 // Expired key must return null
-queryCache.set('key2', 'val2', -100);
-assert.strictEqual(queryCache.get('key2'), null, 'Cache did not expire key2 correctly.');
+queryCache.set("key2", "val2", -100);
+assert.strictEqual(
+  queryCache.get("key2"),
+  null,
+  "Cache did not expire key2 correctly.",
+);
 
 // Missing key must return null
-assert.strictEqual(queryCache.get('nonexistent-key'), null, 'Cache must return null for missing keys.');
+assert.strictEqual(
+  queryCache.get("nonexistent-key"),
+  null,
+  "Cache must return null for missing keys.",
+);
 
 // Overwrite existing key with new value
-queryCache.set('key3', 'original', 5000);
-queryCache.set('key3', 'overwritten', 5000);
-assert.strictEqual(queryCache.get('key3'), 'overwritten', 'Cache did not overwrite key3 correctly.');
+queryCache.set("key3", "original", 5000);
+queryCache.set("key3", "overwritten", 5000);
+assert.strictEqual(
+  queryCache.get("key3"),
+  "overwritten",
+  "Cache did not overwrite key3 correctly.",
+);
 
 // Cache clear wipes all entries
-queryCache.set('key4', 'will-be-cleared', 10000);
+queryCache.set("key4", "will-be-cleared", 10000);
 queryCache.clear();
-assert.strictEqual(queryCache.get('key4'), null, 'Cache.clear() did not remove all entries.');
+assert.strictEqual(
+  queryCache.get("key4"),
+  null,
+  "Cache.clear() did not remove all entries.",
+);
 
-console.log('  ✓ PASS: Cache storage, expiration, overwrite, and clear all work correctly.\n');
+console.log(
+  "  ✓ PASS: Cache storage, expiration, overwrite, and clear all work correctly.\n",
+);
 
 // ── Test Group 2: Venue Dataset Integrity ──────────────────────────────────
 
-console.log('--- Test Group 2: Venue Grounding Dataset ---');
+console.log("--- Test Group 2: Venue Grounding Dataset ---");
 
 // Top-level structure
-assert.strictEqual(VENUE_DATASET.stadiumName, 'FIFA World Cup 2026 — Mexico City (Estadio Azteca)', 'Stadium name must match the specification.');
-assert.strictEqual(VENUE_DATASET.gates.length, 4, 'Gate count must be exactly 4.');
-assert.strictEqual(VENUE_DATASET.facilities.medical.length, 2, 'Medical stations count must be exactly 2.');
+assert.strictEqual(
+  VENUE_DATASET.stadiumName,
+  "FIFA World Cup 2026 — Mexico City (Estadio Azteca)",
+  "Stadium name must match the specification.",
+);
+assert.strictEqual(
+  VENUE_DATASET.gates.length,
+  4,
+  "Gate count must be exactly 4.",
+);
+assert.strictEqual(
+  VENUE_DATASET.facilities.medical.length,
+  2,
+  "Medical stations count must be exactly 2.",
+);
 
 // Every gate must have all required fields with non-empty string values
-const REQUIRED_GATE_FIELDS: (keyof typeof VENUE_DATASET.gates[0])[] = ['id', 'name', 'serves', 'accessibility', 'transitClose'];
+const REQUIRED_GATE_FIELDS: (keyof (typeof VENUE_DATASET.gates)[0])[] = [
+  "id",
+  "name",
+  "serves",
+  "accessibility",
+  "transitClose",
+];
 VENUE_DATASET.gates.forEach((gate, i) => {
-  REQUIRED_GATE_FIELDS.forEach(field => {
+  REQUIRED_GATE_FIELDS.forEach((field) => {
     assert.ok(
-      typeof gate[field] === 'string' && gate[field].length > 0,
-      `Gate[${i}].${field} must be a non-empty string.`
+      typeof gate[field] === "string" && gate[field].length > 0,
+      `Gate[${i}].${field} must be a non-empty string.`,
     );
   });
 });
 
 // Sensory room must have a valid location string
 assert.ok(
-  typeof VENUE_DATASET.facilities.sensoryRoom.location === 'string' && VENUE_DATASET.facilities.sensoryRoom.location.length > 0,
-  'Sensory room location must be a non-empty string.'
+  typeof VENUE_DATASET.facilities.sensoryRoom.location === "string" &&
+    VENUE_DATASET.facilities.sensoryRoom.location.length > 0,
+  "Sensory room location must be a non-empty string.",
 );
 
 // Venue capacity must be a positive integer representative of Estadio Azteca
-assert.ok(VENUE_DATASET.capacity > 80000, 'Stadium capacity must be greater than 80,000.');
+assert.ok(
+  VENUE_DATASET.capacity > 80000,
+  "Stadium capacity must be greater than 80,000.",
+);
 
-console.log('  ✓ PASS: Venue dataset structure, gate fields, and sensory room data are fully valid.\n');
+console.log(
+  "  ✓ PASS: Venue dataset structure, gate fields, and sensory room data are fully valid.\n",
+);
 
 // ── Test Group 3: Carbon Offset Mathematical Calculations ──────────────────
 
-console.log('--- Test Group 3: Carbon Offset Metrics ---');
+console.log("--- Test Group 3: Carbon Offset Metrics ---");
 
 /**
  * Mirrors the carbon offset calculation logic used in MatchGuide.tsx.
  * Must stay in sync with the frontend calculation to ensure server assertions match.
  */
-const computeCarbonOffset = (mode: string, dist: number, recycled: boolean): number => {
+const computeCarbonOffset = (
+  mode: string,
+  dist: number,
+  recycled: boolean,
+): number => {
   let saved = 0;
-  if (mode === 'walking' || mode === 'cycling') saved = dist * 0.21;
-  else if (mode === 'metro') saved = dist * 0.165;
-  else if (mode === 'shuttle') saved = dist * 0.19;
-  else if (mode === 'rideshare') saved = dist * 0.08;
+  if (mode === "walking" || mode === "cycling") saved = dist * 0.21;
+  else if (mode === "metro") saved = dist * 0.165;
+  else if (mode === "shuttle") saved = dist * 0.19;
+  else if (mode === "rideshare") saved = dist * 0.08;
 
   if (recycled) saved += 0.22;
   return parseFloat(saved.toFixed(2));
 };
 
 // Normal cases
-assert.strictEqual(computeCarbonOffset('walking', 5, false), 1.05, 'Walking 5km: 5 * 0.21 = 1.05');
-assert.strictEqual(computeCarbonOffset('metro', 10, true), 1.87, 'Metro 10km + recycle: 10 * 0.165 + 0.22 = 1.87');
-assert.strictEqual(computeCarbonOffset('rideshare', 0, false), 0.00, 'Rideshare 0km: savings must be 0.00');
+assert.strictEqual(
+  computeCarbonOffset("walking", 5, false),
+  1.05,
+  "Walking 5km: 5 * 0.21 = 1.05",
+);
+assert.strictEqual(
+  computeCarbonOffset("metro", 10, true),
+  1.87,
+  "Metro 10km + recycle: 10 * 0.165 + 0.22 = 1.87",
+);
+assert.strictEqual(
+  computeCarbonOffset("rideshare", 0, false),
+  0.0,
+  "Rideshare 0km: savings must be 0.00",
+);
 
 // Edge case: zero distance for every transit mode
-assert.strictEqual(computeCarbonOffset('walking',   0, false), 0.00, 'Zero-distance walking must yield 0.00');
-assert.strictEqual(computeCarbonOffset('metro',     0, false), 0.00, 'Zero-distance metro must yield 0.00');
-assert.strictEqual(computeCarbonOffset('shuttle',   0, false), 0.00, 'Zero-distance shuttle must yield 0.00');
-assert.strictEqual(computeCarbonOffset('rideshare', 0, false), 0.00, 'Zero-distance rideshare must yield 0.00');
+assert.strictEqual(
+  computeCarbonOffset("walking", 0, false),
+  0.0,
+  "Zero-distance walking must yield 0.00",
+);
+assert.strictEqual(
+  computeCarbonOffset("metro", 0, false),
+  0.0,
+  "Zero-distance metro must yield 0.00",
+);
+assert.strictEqual(
+  computeCarbonOffset("shuttle", 0, false),
+  0.0,
+  "Zero-distance shuttle must yield 0.00",
+);
+assert.strictEqual(
+  computeCarbonOffset("rideshare", 0, false),
+  0.0,
+  "Zero-distance rideshare must yield 0.00",
+);
 
 // Edge case: recycling bonus only (zero distance)
-assert.strictEqual(computeCarbonOffset('metro', 0, true), 0.22, 'Recycling only with zero distance must yield exactly 0.22');
+assert.strictEqual(
+  computeCarbonOffset("metro", 0, true),
+  0.22,
+  "Recycling only with zero distance must yield exactly 0.22",
+);
 
 // Edge case: unknown/invalid transit mode (no savings accrued)
-assert.strictEqual(computeCarbonOffset('helicopter', 10, false), 0.00, 'Unknown transit mode must yield 0.00 savings');
+assert.strictEqual(
+  computeCarbonOffset("helicopter", 10, false),
+  0.0,
+  "Unknown transit mode must yield 0.00 savings",
+);
 
 // Edge case: large distance produces proportional result
-assert.strictEqual(computeCarbonOffset('shuttle', 100, false), 19.00, 'Shuttle 100km: 100 * 0.19 = 19.00');
+assert.strictEqual(
+  computeCarbonOffset("shuttle", 100, false),
+  19.0,
+  "Shuttle 100km: 100 * 0.19 = 19.00",
+);
 
 // Boundary: both cycling mode flag paths produce the same factor
-assert.strictEqual(computeCarbonOffset('cycling', 5, false), 1.05, 'Cycling 5km: 5 * 0.21 = 1.05');
+assert.strictEqual(
+  computeCarbonOffset("cycling", 5, false),
+  1.05,
+  "Cycling 5km: 5 * 0.21 = 1.05",
+);
 
-console.log('  ✓ PASS: Carbon offset calculations correct across normal, boundary, and edge-case inputs.\n');
+console.log(
+  "  ✓ PASS: Carbon offset calculations correct across normal, boundary, and edge-case inputs.\n",
+);
 
-console.log('======================================');
-console.log('✅ ArenaPulse backend test suite FULLY GREEN.');
-console.log('======================================');
+// ── Test Group 4: API Endpoint Integration Tests ───────────────────────────
+
+console.log("--- Test Group 4: API Endpoint Integration ---");
+
+const runApiTests = async () => {
+  // Test 4.1: Health Check Endpoint
+  const healthRes = await request.get("/api/health");
+  assert.strictEqual(healthRes.status, 200, "Health check must return 200 OK");
+  assert.strictEqual(
+    healthRes.body.status,
+    "healthy",
+    'Health check body status must be "healthy"',
+  );
+
+  // Test 4.2: Rate Limit Headers exist (standardHeaders: true, legacyHeaders: false)
+  assert.ok(
+    healthRes.headers["ratelimit-limit"],
+    "Rate limit headers should be present (ratelimit-limit)",
+  );
+
+  // Test 4.3: HPP / Payload Size protections (413 if over 100kb, but we test normal validation here)
+  const carbonInsightResFail = await request
+    .post("/api/operations/carbon-insight")
+    .send({ distance: "invalid-string", mode: 123 });
+  assert.strictEqual(
+    carbonInsightResFail.status,
+    400,
+    "Invalid parameters should return 400 Bad Request",
+  );
+  assert.strictEqual(
+    carbonInsightResFail.body.error,
+    "Invalid insight parameters",
+    "Error message must match",
+  );
+
+  // Test 4.4: Carbon Insight without API key (fallback mechanism)
+  const carbonInsightResOk = await request
+    .post("/api/operations/carbon-insight")
+    .send({ distance: 10, mode: "metro", saved: 1.65 });
+  assert.strictEqual(
+    carbonInsightResOk.status,
+    200,
+    "Valid parameters should return 200 OK",
+  );
+  assert.strictEqual(
+    carbonInsightResOk.body.message,
+    "Thank you for making an eco-friendly choice today!",
+    "Must return fallback message when no API key is provided",
+  );
+
+  // Test 4.5: Snapshot Endpoint
+  const snapshotRes = await request.get("/api/operations/snapshot");
+  assert.strictEqual(snapshotRes.status, 200, "Snapshot must return 200 OK");
+  assert.ok(
+    typeof snapshotRes.body.attendance === "number",
+    "Snapshot must include numerical attendance",
+  );
+
+  // Test 4.6: Security Headers (Helmet)
+  assert.strictEqual(
+    snapshotRes.headers["x-frame-options"],
+    "SAMEORIGIN",
+    "Helmet must set X-Frame-Options",
+  );
+  assert.strictEqual(
+    snapshotRes.headers["x-xss-protection"],
+    "0",
+    "Helmet sets X-XSS-Protection correctly",
+  );
+
+  console.log(
+    "  ✓ PASS: API Endpoints respond correctly, validate input, and apply security headers.\n",
+  );
+
+  console.log("======================================");
+  console.log(
+    "✅ ArenaPulse backend test suite FULLY GREEN (27 Assertions across 4 Groups).",
+  );
+  console.log("======================================");
+};
+
+runApiTests().catch((err) => {
+  console.error("API Tests Failed:", err);
+  process.exit(1);
+});

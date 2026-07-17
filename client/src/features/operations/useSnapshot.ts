@@ -50,15 +50,15 @@ const PLACEHOLDER_SNAPSHOT: TelemetrySnapshot = {
       locationId: 'gate-d',
       severity: 'warning',
       timestamp: new Date().toLocaleTimeString(),
-      description: 'Elevated density near Gate D entry tunnel — stewards dispatched.'
-    }
+      description: 'Elevated density near Gate D entry tunnel — stewards dispatched.',
+    },
   ],
   zones: [
     { id: 'zone-north', name: 'North Stand', occupancy: 91, status: 'critical' },
-    { id: 'zone-east',  name: 'East Stand',  occupancy: 74, status: 'busy' },
+    { id: 'zone-east', name: 'East Stand', occupancy: 74, status: 'busy' },
     { id: 'zone-south', name: 'South Stand', occupancy: 62, status: 'comfortable' },
-    { id: 'zone-west',  name: 'West Stand',  occupancy: 85, status: 'busy' }
-  ]
+    { id: 'zone-west', name: 'West Stand', occupancy: 85, status: 'busy' },
+  ],
 };
 
 /** Return shape of the useSnapshot hook. */
@@ -78,7 +78,7 @@ export interface UseSnapshotReturn {
 export function useSnapshot(): UseSnapshotReturn {
   const [snapshot, setSnapshot] = useState<TelemetrySnapshot>(PLACEHOLDER_SNAPSHOT);
   const [logs, setLogs] = useState<string[]>([
-    `[${new Date().toLocaleTimeString()}] [SYSTEM] GenAI Command Hub online. FIFA World Cup 2026 — Mexico City Stadium Operations Centre.`
+    `[${new Date().toLocaleTimeString()}] [SYSTEM] GenAI Command Hub online. FIFA World Cup 2026 — Mexico City Stadium Operations Centre.`,
   ]);
 
   const fetchSnapshot = useCallback(async (): Promise<void> => {
@@ -88,14 +88,14 @@ export function useSnapshot(): UseSnapshotReturn {
         const data = (await response.json()) as TelemetrySnapshot;
         setSnapshot(data);
         const tickLog = `[${new Date().toLocaleTimeString()}] [SENSOR] Live update: Gate D wait now ${data.avgGateWait.toFixed(1)}m | Attendance ${data.attendance.toLocaleString()}.`;
-        setLogs(prev => [tickLog, ...prev.slice(0, 15)]);
+        setLogs((prev) => [tickLog, ...prev.slice(0, 15)]);
       } else {
         const errLog = `[${new Date().toLocaleTimeString()}] [WARN] API returned ${response.status}. Running on simulation data.`;
-        setLogs(prev => [errLog, ...prev.slice(0, 15)]);
+        setLogs((prev) => [errLog, ...prev.slice(0, 15)]);
       }
     } catch {
       const errLog = `[${new Date().toLocaleTimeString()}] [WARN] API unreachable. Simulation mode active.`;
-      setLogs(prev => [errLog, ...prev.slice(0, 15)]);
+      setLogs((prev) => [errLog, ...prev.slice(0, 15)]);
     }
   }, []);
 

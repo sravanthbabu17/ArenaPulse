@@ -22,7 +22,7 @@
 
 body {
   background-color: var(--bg-base);
-  background-image: 
+  background-image:
     radial-gradient(circle at 15% 15%, rgba(0, 136, 255, 0.08) 0%, transparent 40%),
     radial-gradient(circle at 85% 85%, rgba(0, 255, 135, 0.06) 0%, transparent 40%);
   background-attachment: fixed;
@@ -52,7 +52,10 @@ body {
 }
 
 /* Typography Utility */
-h1, h2, h3, h4 {
+h1,
+h2,
+h3,
+h4 {
   font-weight: 600;
   letter-spacing: -0.2px;
 }
@@ -444,7 +447,8 @@ h1, h2, h3, h4 {
   color: var(--text-muted);
 }
 
-.calc-row select, .calc-row input {
+.calc-row select,
+.calc-row input {
   padding: 0.6rem 0.85rem;
   background-color: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border-light);
@@ -780,23 +784,44 @@ h1, h2, h3, h4 {
 
 /* Keyframes animations */
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 @keyframes pulse-glow {
-  0%, 100% { filter: drop-shadow(0 0 2px var(--color-primary)); transform: scale(1); }
-  50% { filter: drop-shadow(0 0 10px var(--color-primary)); transform: scale(1.05); }
+  0%,
+  100% {
+    filter: drop-shadow(0 0 2px var(--color-primary));
+    transform: scale(1);
+  }
+  50% {
+    filter: drop-shadow(0 0 10px var(--color-primary));
+    transform: scale(1.05);
+  }
 }
 
 @keyframes slide-up {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes fade-in {
-  from { opacity: 0; }
-  to { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 /* Skip-to-content link — WCAG 2.1 SC 2.4.1 */
@@ -860,7 +885,8 @@ h1, h2, h3, h4 {
   .tab-viewport.active {
     display: flex;
   }
-  .dashboard-grid-half, .dashboard-grid-custom {
+  .dashboard-grid-half,
+  .dashboard-grid-custom {
     grid-template-columns: 1fr;
     height: auto;
   }

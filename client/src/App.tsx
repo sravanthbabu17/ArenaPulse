@@ -27,17 +27,22 @@ function App() {
 
   return (
     <div className="app-container">
-
       {/* Skip-to-content link — WCAG 2.1 SC 2.4.1: Bypass Blocks */}
-      <a href="#main-content" className="skip-link">Skip to main content</a>
+      <a href="#main-content" className="skip-link">
+        Skip to main content
+      </a>
 
       {/* Header Panel */}
       <header className="app-header">
         <div className="brand-wrapper">
-          <span className="brand-logo-icon" aria-hidden="true">⚽</span>
+          <span className="brand-logo-icon" aria-hidden="true">
+            ⚽
+          </span>
           <div>
             <h1 className="brand-title">ArenaPulse 2026</h1>
-            <span className="brand-subtitle">FIFA World Cup 2026 · GenAI Stadium Intelligence Platform</span>
+            <span className="brand-subtitle">
+              FIFA World Cup 2026 · GenAI Stadium Intelligence Platform
+            </span>
           </div>
         </div>
 
@@ -110,7 +115,12 @@ function App() {
       </main>
 
       {/* A11y Announcer — used by MatchGuide for screen reader chat updates */}
-      <div id="accessibility-announcer" className="sr-only" aria-live="polite" aria-atomic="true"></div>
+      <div
+        id="accessibility-announcer"
+        className="sr-only"
+        aria-live="polite"
+        aria-atomic="true"
+      ></div>
     </div>
   );
 }
