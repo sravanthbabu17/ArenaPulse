@@ -1,0 +1,22 @@
+# Local node modules
+node_modules/
+
+# Build output — never commit compiled artifacts
+dist/
+build/
+
+# Environment secrets — never commit API keys
+.env
+.env.local
+.env.production
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Project post-mortems and workspace config files
+REJECTION_ANALYSIS.md
+.vscode/
+.idea/
+.gemini/
+*.log
